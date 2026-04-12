@@ -7,81 +7,969 @@
 <style>
 body {
  margin:0;
- font-family:Arial;
- background:#3498db;
+ font-family:Arial,sans-serif;
+ background:var(--page-bg, linear-gradient(180deg,#3498db 0%,#21618c 100%));
  color:white;
  text-align:center;
  overflow:hidden;
 }
 
-#menu {
+#topBrand {
+ position:fixed;
+ top:0;
+ left:0;
+ right:0;
+ z-index:40;
+ display:flex;
+ flex-direction:column;
+ align-items:center;
+ justify-content:center;
+ gap:4px;
+ padding:14px 16px 12px;
+ background:linear-gradient(180deg, rgba(3,10,18,0.88) 0%, rgba(3,10,18,0.6) 72%, rgba(3,10,18,0) 100%);
+ pointer-events:none;
+}
+
+.brandTitle {
+ margin:0;
+ font-size:clamp(24px, 4vw, 36px);
+ line-height:1;
+ letter-spacing:1px;
+ text-transform:uppercase;
+ color:#f8fdff;
+ text-shadow:
+  0 0 6px rgba(255,255,255,0.95),
+  0 0 14px rgba(125,211,252,0.95),
+  0 0 28px rgba(59,130,246,0.9),
+  0 0 48px rgba(37,99,235,0.7);
+}
+
+.brandCredit {
+ margin:0;
+ font-size:13px;
+ letter-spacing:0.16em;
+ text-transform:uppercase;
+ color:rgba(255,255,255,0.82);
+ text-shadow:0 0 14px rgba(0,0,0,0.3);
+}
+
+#menu,
+#gameOver {
  position:absolute;
  inset:0;
  display:flex;
  flex-direction:column;
- justify-content:center;
+ justify-content:flex-start;
  align-items:center;
- background:#3498db;
+ background:var(--page-bg, linear-gradient(180deg,#3498db 0%,#21618c 100%));
+ padding:96px 16px 24px;
+ box-sizing:border-box;
+ overflow-y:auto;
+}
+
+#gameOver {
+ display:none;
+ background:rgba(5,17,29,0.92);
 }
 
 #gameUI {
  display:none;
+ padding-top:86px;
 }
 
 #gameArea {
  position:relative;
  width:100%;
  height:70vh;
- background:#2980b9;
- overflow:hidden;
+ background:var(--arena-bg, #2980b9);
+  overflow:hidden;
+ cursor:none;
 }
 
-#target {
+#darknessOverlay {
+ position:absolute;
+ inset:0;
+ display:none;
+ pointer-events:none;
+ background:radial-gradient(circle at 50% 50%, rgba(255,255,255,0.06) 0 70px, rgba(0,0,0,0.68) 180px);
+ z-index:1;
+}
+
+.targetOrb {
  position:absolute;
  width:60px;
  height:60px;
  display:none;
+ display:flex;
+ align-items:center;
+ justify-content:center;
+  cursor:pointer;
+  transition:
+  left 1s linear,
+  top 1s linear,
+  transform 0.12s ease,
+  box-shadow 0.2s ease,
+  background 0.2s ease;
+  border-radius:50%;
+ font-weight:bold;
+ color:white;
+ user-select:none;
+  z-index:2;
+}
+
+#targetBoss {
+ width:46px;
+ height:46px;
+ opacity:0.92;
+}
+
+#customCursor {
+ position:absolute;
+ width:28px;
+ height:28px;
+ display:none;
+ border-radius:50%;
+ pointer-events:none;
+ z-index:12;
+ transform:translate(-50%,-50%);
+ transition:opacity 0.15s ease, transform 0.08s ease;
+ box-sizing:border-box;
+}
+
+.miniTarget {
+ width:30px;
+ height:30px;
+}
+
+#bonusCrate {
+ position:absolute;
+ width:42px;
+ height:42px;
+ display:none;
  cursor:pointer;
- transition:0.1s;
+ border-radius:12px;
+ background:linear-gradient(135deg,#8b5a2b,#d4a373);
+ border:2px solid rgba(255,240,200,0.45);
+ box-shadow:0 0 18px rgba(255,183,77,0.55);
+ transition:transform 0.12s ease, box-shadow 0.2s ease;
+}
+
+#bonusCrate::before {
+ content:"";
+ position:absolute;
+ inset:8px;
+ border-radius:8px;
+ border:2px solid rgba(77,44,12,0.45);
+}
+
+#bonusCrate:hover {
+ transform:scale(1.06) rotate(-4deg);
 }
 
 button {
- padding:10px;
+ padding:10px 14px;
  margin:5px;
  border:none;
- border-radius:8px;
+ border-radius:10px;
  cursor:pointer;
+ background:white;
+ color:#123;
+ font-weight:bold;
+ transition:transform 0.12s ease, opacity 0.2s ease, box-shadow 0.2s ease;
 }
 
-#shop {
- display:none;
- background:rgba(0,0,0,0.8);
- padding:10px;
+button:hover {
+ transform:translateY(-1px);
+}
+
+button:active,
+.pressed {
+ transform:scale(0.96);
+}
+
+.secondaryButton {
+ background:rgba(255,255,255,0.14);
+ color:white;
+ border:1px solid rgba(255,255,255,0.28);
+}
+
+.panel {
+ width:min(760px,92vw);
+ max-height:calc(100vh - 48px);
+ background:rgba(0,0,0,0.28);
+ border:1px solid rgba(255,255,255,0.16);
+ border-radius:20px;
+ padding:18px;
+ box-sizing:border-box;
+ backdrop-filter:blur(6px);
+ overflow-y:auto;
+}
+
+.controlsRow {
+ display:flex;
+ gap:12px;
+ flex-wrap:wrap;
+ justify-content:center;
+ align-items:center;
+ margin:12px 0;
+}
+
+.timeControl {
+ display:flex;
+ align-items:center;
+ gap:10px;
+ justify-content:center;
+ flex-wrap:wrap;
+ margin-top:8px;
+}
+
+.timeControl input {
+ width:90px;
+ padding:8px 10px;
+ border:none;
  border-radius:10px;
+ font-size:16px;
+ text-align:center;
+}
+
+.storePanel {
+ display:none;
+ margin-top:16px;
+ text-align:left;
+}
+
+.shopStats {
+ display:flex;
+ gap:10px;
+ flex-wrap:wrap;
+ margin-bottom:12px;
+ position:sticky;
+ top:0;
+ z-index:2;
+ background:rgba(10,20,35,0.88);
+ padding:10px;
+ border-radius:14px;
+ border:1px solid rgba(255,255,255,0.12);
+}
+
+.featureSection {
+ background:rgba(255,255,255,0.06);
+ border:1px solid rgba(255,255,255,0.12);
+ border-radius:16px;
+ padding:12px;
+ margin-bottom:14px;
+}
+
+.featureSection h3,
+.featureSection h4 {
+ margin:0 0 10px;
+}
+
+.infoRow {
+ display:flex;
+ gap:10px;
+ flex-wrap:wrap;
+ align-items:center;
+ justify-content:space-between;
+}
+
+.statChip {
+ display:inline-flex;
+ align-items:center;
+ gap:6px;
+ padding:6px 10px;
+ border-radius:999px;
+ background:rgba(255,255,255,0.1);
+ border:1px solid rgba(255,255,255,0.14);
+}
+
+.statChip.active {
+ background:rgba(46,204,113,0.18);
+ border-color:rgba(46,204,113,0.45);
+}
+
+.progressBar {
+ width:100%;
+ height:10px;
+ background:rgba(255,255,255,0.12);
+ border-radius:999px;
+ overflow:hidden;
+ margin-top:8px;
+}
+
+.progressFill {
+ height:100%;
+ background:linear-gradient(90deg,#2ecc71,#f1c40f);
+}
+
+.achievementItem,
+.missionItem {
+ background:rgba(255,255,255,0.08);
+ border:1px solid rgba(255,255,255,0.12);
+ border-radius:14px;
+ padding:10px;
  margin-top:10px;
+}
+
+.achievementItem.unlocked {
+ border-color:rgba(46,204,113,0.5);
+ box-shadow:0 0 18px rgba(46,204,113,0.12);
+}
+
+.achievementItem.locked {
+ opacity:0.72;
+}
+
+.particle {
+ position:fixed;
+ width:10px;
+ height:10px;
+ border-radius:50%;
+ pointer-events:none;
+ z-index:30;
+ animation:particlePop 650ms ease-out forwards;
+}
+
+@keyframes particlePop {
+ from {
+  opacity:1;
+  transform:translate(0,0) scale(1);
+ }
+ to {
+  opacity:0;
+  transform:translate(var(--dx),var(--dy)) scale(0.2);
+ }
+}
+
+@keyframes pulseGlow {
+ 0%,100% { transform:scale(1); }
+ 50% { transform:scale(1.08); }
+}
+
+@keyframes shakeGlow {
+ 0%,100% { transform:translateX(0); }
+ 25% { transform:translateX(-2px); }
+ 75% { transform:translateX(2px); }
+}
+
+@keyframes floatSpin {
+ 0% { transform:translateY(0) rotate(0deg); }
+ 50% { transform:translateY(-3px) rotate(4deg); }
+ 100% { transform:translateY(0) rotate(0deg); }
+}
+
+@keyframes lightningFlash {
+ 0%,100% { filter:brightness(1); }
+ 50% { filter:brightness(1.5); }
+}
+
+.storeGrid {
+ display:grid;
+ grid-template-columns:repeat(auto-fit,minmax(150px,1fr));
+ gap:12px;
+ margin-top:10px;
+}
+
+.skinCard {
+ background:rgba(255,255,255,0.08);
+ border:1px solid rgba(255,255,255,0.14);
+ border-radius:16px;
+ padding:12px;
+}
+
+.crateCard {
+ background:rgba(255,255,255,0.1);
+ border:1px solid rgba(255,255,255,0.18);
+ border-radius:16px;
+ padding:12px;
+}
+
+.skinPreview {
+ width:100%;
+ height:54px;
+ border-radius:14px;
+ margin-bottom:10px;
+ border:2px solid rgba(255,255,255,0.18);
+ box-sizing:border-box;
+}
+
+.cratePreview {
+ width:100%;
+ height:54px;
+ border-radius:14px;
+ margin-bottom:10px;
+ box-sizing:border-box;
+ position:relative;
+ overflow:hidden;
+}
+
+.cratePreview::before {
+ content:"";
+ position:absolute;
+ inset:8px;
+ border-radius:10px;
+ border:2px solid rgba(255,255,255,0.32);
+}
+
+.skinCard h4,
+.skinCard p {
+ margin:0 0 8px;
+}
+
+.skinCard button {
+ width:100%;
+ margin:0;
+}
+
+.ownedTag {
+ display:inline-block;
+ font-size:12px;
+ font-weight:bold;
+ padding:4px 8px;
+ border-radius:999px;
+ background:rgba(46,204,113,0.2);
+ color:#8ef0b0;
+ margin-bottom:8px;
+}
+
+.rarityTag {
+ display:inline-block;
+ font-size:12px;
+ font-weight:bold;
+ padding:4px 8px;
+ border-radius:999px;
+ margin:0 0 8px;
+ color:white;
+}
+
+.rarity-common {
+ background:#7f8c8d;
+}
+
+.rarity-rare {
+ background:#2980b9;
+}
+
+.rarity-epic {
+ background:#8e44ad;
+}
+
+.rarity-legendary {
+ background:#d35400;
+}
+
+.emptyState {
+ opacity:0.8;
+ text-align:center;
+ padding:18px 10px 8px;
+}
+
+.shopMessage {
+ min-height:24px;
+ margin-top:10px;
+ font-weight:bold;
+}
+
+.shopMessage.success {
+ color:#8ef0b0;
+}
+
+.shopMessage.error {
+ color:#ffb3b3;
+}
+
+#feedback {
+ position:fixed;
+ left:50%;
+ bottom:24px;
+ transform:translateX(-50%) translateY(16px);
+ background:rgba(8,20,34,0.92);
+ color:white;
+ padding:12px 18px;
+ border-radius:999px;
+ border:1px solid rgba(255,255,255,0.18);
+ opacity:0;
+ pointer-events:none;
+ transition:opacity 0.25s ease, transform 0.25s ease;
+ z-index:20;
+}
+
+#feedback.show {
+ opacity:1;
+ transform:translateX(-50%) translateY(0);
+}
+
+#feedback.success {
+ box-shadow:0 0 20px rgba(46,204,113,0.35);
+}
+
+#feedback.error {
+ box-shadow:0 0 20px rgba(231,76,60,0.35);
+}
+
+#wheelOverlay {
+ position:fixed;
+ inset:0;
+ display:none;
+ align-items:center;
+ justify-content:center;
+ background:rgba(4,10,20,0.78);
+ z-index:40;
+ padding:20px;
+ box-sizing:border-box;
+}
+
+#wheelOverlay.show {
+ display:flex;
+}
+
+.wheelModal {
+ width:min(520px,94vw);
+ background:linear-gradient(180deg,rgba(14,28,45,0.96),rgba(8,17,31,0.96));
+ border:1px solid rgba(255,255,255,0.16);
+ border-radius:24px;
+ padding:20px;
+ box-sizing:border-box;
+ text-align:center;
+ box-shadow:0 20px 60px rgba(0,0,0,0.45);
+}
+
+.wheelStage {
+ position:relative;
+ width:min(360px,72vw);
+ height:min(360px,72vw);
+ margin:16px auto;
+}
+
+.wheelPointer {
+ position:absolute;
+ top:-8px;
+ left:50%;
+ transform:translateX(-50%);
+ width:0;
+ height:0;
+ border-left:18px solid transparent;
+ border-right:18px solid transparent;
+ border-top:0;
+ border-bottom:30px solid #fff7cc;
+ z-index:3;
+ filter:drop-shadow(0 4px 8px rgba(0,0,0,0.35));
+}
+
+.wheelDisc {
+ position:absolute;
+ inset:0;
+ border-radius:50%;
+ border:8px solid rgba(255,255,255,0.22);
+ box-shadow:0 0 30px rgba(0,0,0,0.3), inset 0 0 24px rgba(255,255,255,0.08);
+ transition:transform 4.6s cubic-bezier(0.16,0.9,0.12,1);
+ overflow:hidden;
+}
+
+.wheelCenter {
+ position:absolute;
+ left:50%;
+ top:50%;
+ transform:translate(-50%,-50%);
+ width:76px;
+ height:76px;
+ border-radius:50%;
+ background:radial-gradient(circle,#fff,#d8e6ff 68%,#7f8fa6 100%);
+ z-index:2;
+ border:6px solid rgba(14,28,45,0.9);
+ box-shadow:0 0 16px rgba(255,255,255,0.25);
+}
+
+.wheelLabel {
+ position:absolute;
+ left:50%;
+ top:50%;
+ width:124px;
+ text-align:center;
+ font-size:12px;
+ font-weight:bold;
+ color:white;
+ transform-origin:0 0;
+ text-shadow:0 1px 3px rgba(0,0,0,0.5);
+ pointer-events:none;
+}
+
+.wheelResult {
+ min-height:24px;
+ margin:12px 0;
+ font-weight:bold;
+}
+
+#bossHud {
+ display:none;
+ width:min(720px,92vw);
+ margin:0 auto 8px;
+ text-align:left;
+}
+
+#bossHudLabel {
+ font-weight:bold;
+ margin-bottom:6px;
+}
+
+#streakText {
+ position:absolute;
+ left:50%;
+ top:18%;
+ transform:translateX(-50%);
+ font-size:34px;
+ font-weight:bold;
+ text-shadow:0 4px 12px rgba(0,0,0,0.35);
+ opacity:0;
+ pointer-events:none;
+ z-index:10;
+ transition:opacity 0.2s ease, transform 0.2s ease;
+}
+
+#streakText.show {
+ opacity:1;
+ transform:translateX(-50%) translateY(-8px);
+}
+
+#crateOverlay,
+#legendaryOverlay {
+ position:fixed;
+ inset:0;
+ display:none;
+ align-items:center;
+ justify-content:center;
+ background:rgba(4,10,20,0.82);
+ z-index:45;
+ padding:20px;
+ box-sizing:border-box;
+}
+
+#crateOverlay.show,
+#legendaryOverlay.show {
+ display:flex;
+}
+
+.crateModal,
+.legendaryModal {
+ width:min(520px,94vw);
+ background:linear-gradient(180deg,rgba(14,28,45,0.97),rgba(8,17,31,0.97));
+ border:1px solid rgba(255,255,255,0.16);
+ border-radius:24px;
+ padding:24px;
+ box-sizing:border-box;
+ text-align:center;
+ box-shadow:0 20px 60px rgba(0,0,0,0.45);
+}
+
+.crateBox {
+ width:150px;
+ height:150px;
+ margin:18px auto;
+ border-radius:28px;
+ position:relative;
+ overflow:visible;
+ cursor:pointer;
+ transform-origin:center 78%;
+ transition:transform 0.28s ease, box-shadow 0.28s ease, filter 0.28s ease;
+ filter:drop-shadow(0 10px 18px rgba(0,0,0,0.22));
+ --crate-glow: rgba(255,183,77,0.35);
+ --crate-panel: linear-gradient(135deg,#8b5a2b,#d4a373);
+ --crate-metal: rgba(255,240,200,0.4);
+ --crate-shadow: rgba(77,44,12,0.3);
+}
+
+.crateBox::before {
+ content:"";
+ position:absolute;
+ inset:-8px;
+ border-radius:36px;
+ background:radial-gradient(circle,rgba(255,214,102,0.24),rgba(255,214,102,0) 70%);
+ opacity:0.45;
+ pointer-events:none;
+}
+
+.crateBox::after {
+ content:"";
+ position:absolute;
+ inset:0;
+  border-radius:28px;
+  opacity:0;
+  pointer-events:none;
+  background-repeat:no-repeat;
+ transition:opacity 0.22s ease;
+ z-index:3;
+}
+
+.crateBox.shake {
+ animation:crateShake 0.42s ease-in-out 1;
+}
+
+.crateLid,
+.crateBody {
+ position:absolute;
+ left:0;
+ width:100%;
+ border:4px solid var(--crate-metal);
+ box-sizing:border-box;
+ background:var(--crate-panel);
+ box-shadow:inset 0 1px 0 rgba(255,255,255,0.18), inset 0 -2px 0 var(--crate-shadow);
+ transition:transform 0.34s cubic-bezier(0.2,0.7,0.2,1), opacity 0.3s ease, filter 0.3s ease;
+}
+
+.crateLid {
+ top:0;
+ height:54px;
+ border-radius:28px 28px 16px 16px;
+ transform-origin:center bottom;
+ z-index:2;
+}
+
+.crateBody {
+ bottom:0;
+ height:108px;
+ border-radius:16px 16px 28px 28px;
+}
+
+.crateLid::before,
+.crateBody::before {
+ content:"";
+ position:absolute;
+ inset:12px;
+ border-radius:12px;
+ border:3px solid color-mix(in srgb, var(--crate-shadow) 85%, transparent);
+}
+
+.crateLid::after,
+.crateBody::after {
+ content:"";
+ position:absolute;
+ left:16px;
+ right:16px;
+ top:50%;
+ height:8px;
+ transform:translateY(-50%);
+ border-radius:999px;
+ background:var(--crate-shadow);
+}
+
+.crateShards {
+ position:absolute;
+ inset:-18px;
+ pointer-events:none;
+ z-index:4;
+}
+
+.crateShard {
+ position:absolute;
+ width:28px;
+ height:20px;
+ border-radius:6px;
+ background:var(--crate-panel);
+ border:3px solid var(--crate-metal);
+ box-shadow:0 0 10px var(--crate-glow);
+ opacity:0;
+ transform:translate(0,0) rotate(0deg) scale(0.6);
+}
+
+.crateShard.s1 { left:8px; top:12px; }
+.crateShard.s2 { right:8px; top:14px; }
+.crateShard.s3 { left:16px; bottom:30px; }
+.crateShard.s4 { right:14px; bottom:34px; }
+.crateShard.s5 { left:56px; top:0; }
+.crateShard.s6 { left:58px; bottom:10px; }
+
+.crateBox.breaking .crateShard {
+ animation:shardBurst 0.95s cubic-bezier(0.18,0.8,0.2,1) forwards;
+}
+
+.crateBox.breaking .crateShard.s1 { --tx:-82px; --ty:-52px; --rot:-28deg; animation-delay:0.02s; }
+.crateBox.breaking .crateShard.s2 { --tx:84px; --ty:-48px; --rot:32deg; animation-delay:0.04s; }
+.crateBox.breaking .crateShard.s3 { --tx:-74px; --ty:56px; --rot:-42deg; animation-delay:0.06s; }
+.crateBox.breaking .crateShard.s4 { --tx:76px; --ty:60px; --rot:40deg; animation-delay:0.08s; }
+.crateBox.breaking .crateShard.s5 { --tx:0px; --ty:-92px; --rot:18deg; animation-delay:0.03s; }
+.crateBox.breaking .crateShard.s6 { --tx:0px; --ty:92px; --rot:-18deg; animation-delay:0.05s; }
+
+.crateBox.crate-common {
+ --crate-glow: rgba(189,195,199,0.28);
+ --crate-panel: linear-gradient(135deg,#6b7280,#9ca3af);
+ --crate-metal: rgba(229,231,235,0.46);
+ --crate-shadow: rgba(75,85,99,0.34);
+}
+
+.crateBox.crate-rare {
+ --crate-glow: rgba(93,173,226,0.34);
+ --crate-panel: linear-gradient(135deg,#1d4ed8,#60a5fa);
+ --crate-metal: rgba(191,219,254,0.5);
+ --crate-shadow: rgba(30,64,175,0.34);
+}
+
+.crateBox.crate-epic {
+ --crate-glow: rgba(195,155,211,0.42);
+ --crate-panel: linear-gradient(135deg,#6d28d9,#c084fc);
+ --crate-metal: rgba(233,213,255,0.52);
+ --crate-shadow: rgba(88,28,135,0.34);
+}
+
+.crateBox.crate-legendary {
+ --crate-glow: rgba(248,196,113,0.52);
+ --crate-panel: linear-gradient(135deg,#d97706,#fbbf24,#fff2a8);
+ --crate-metal: rgba(255,244,182,0.62);
+ --crate-shadow: rgba(146,64,14,0.34);
+}
+
+.crateBox.crack-1::after {
+ opacity:0.7;
+ background-image:
+  linear-gradient(115deg,transparent 46%,rgba(255,248,220,0.9) 48%,rgba(77,44,12,0.8) 50%,transparent 52%);
+ background-size:100% 100%;
+}
+
+.crateBox.crack-2::after {
+ opacity:0.88;
+ background-image:
+  linear-gradient(115deg,transparent 46%,rgba(255,248,220,0.95) 48%,rgba(77,44,12,0.85) 50%,transparent 52%),
+  linear-gradient(35deg,transparent 42%,rgba(255,248,220,0.95) 44%,rgba(77,44,12,0.85) 46%,transparent 48%);
+ background-size:100% 100%, 82% 82%;
+ background-position:center center, 30px 34px;
+}
+
+.crateBox.crack-3::after {
+ opacity:1;
+ background-image:
+  linear-gradient(115deg,transparent 46%,rgba(255,248,220,1) 48%,rgba(77,44,12,0.9) 50%,transparent 52%),
+  linear-gradient(35deg,transparent 42%,rgba(255,248,220,1) 44%,rgba(77,44,12,0.9) 46%,transparent 48%),
+  linear-gradient(160deg,transparent 40%,rgba(255,248,220,1) 42%,rgba(77,44,12,0.9) 44%,transparent 46%);
+ background-size:100% 100%, 82% 82%, 76% 76%;
+ background-position:center center, 30px 34px, 58px 18px;
+}
+
+.crateBox.broken {
+ transform:scale(1.03);
+ box-shadow:0 0 44px var(--crate-glow);
+ filter:brightness(1.25);
+}
+
+.crateBox.breaking {
+ animation:crateBreakImpact 0.95s cubic-bezier(0.18,0.8,0.2,1) forwards;
+}
+
+.crateBox.breaking .crateLid {
+ transform:translate(-18px,-56px) rotate(-24deg) scale(1.02);
+ filter:brightness(1.18);
+}
+
+.crateBox.breaking .crateBody {
+ transform:translateY(22px) scale(0.9);
+ filter:brightness(1.08);
+ opacity:0.45;
+}
+
+.crateFlash {
+ width:140px;
+ height:140px;
+ border-radius:50%;
+ margin:0 auto;
+ background:radial-gradient(circle,rgba(255,255,255,0.95) 0%,rgba(255,220,120,0.6) 40%,rgba(255,255,255,0) 72%);
+ opacity:0;
+ transform:scale(0.4);
+}
+
+.crateFlash.show {
+ animation:crateFlashPop 0.9s ease-out forwards;
+}
+
+.legendaryModal {
+ background:radial-gradient(circle at top,rgba(255,180,70,0.32),rgba(8,17,31,0.98) 58%);
+ box-shadow:0 0 80px rgba(255,170,60,0.28);
+}
+
+.leaderboardList {
+ margin:10px 0 0;
+ padding-left:18px;
+ text-align:left;
+}
+
+@keyframes crateShake {
+ 0%,100% { transform:rotate(0deg) translateY(0) scale(1); }
+ 20% { transform:rotate(-3.5deg) translateY(-1px) scale(1.015); }
+ 40% { transform:rotate(3.5deg) translateY(0) scale(1.02); }
+ 60% { transform:rotate(-2deg) translateY(-1px) scale(1.015); }
+ 80% { transform:rotate(2deg) translateY(0) scale(1.01); }
+}
+
+@keyframes crateFlashPop {
+ 0% { opacity:0; transform:scale(0.4); }
+ 20% { opacity:1; transform:scale(1.08); }
+ 100% { opacity:0; transform:scale(1.6); }
+}
+
+@keyframes crateBreakImpact {
+ 0% { transform:scale(1); }
+ 18% { transform:scale(1.05); }
+ 40% { transform:scale(0.96) rotate(-1deg); }
+ 100% { transform:scale(1.04); }
+}
+
+@keyframes shardBurst {
+ 0% {
+  opacity:0;
+  transform:translate(0,0) rotate(0deg) scale(0.6);
+ }
+ 12% {
+  opacity:1;
+ }
+ 100% {
+  opacity:0;
+  transform:translate(var(--tx),var(--ty)) rotate(var(--rot)) scale(1);
+ }
+}
+
+@media (max-width: 700px) {
+ #gameArea {
+  height:62vh;
+ }
+
+ .panel {
+  padding:14px;
+ }
 }
 </style>
 </head>
 
 <body>
 
+<div id="topBrand">
+ <h1 class="brandTitle">Click Game Pro</h1>
+ <p class="brandCredit">Gemaakt door Quinn</p>
+</div>
+
 <!-- MENU -->
-<div id="menu">
- <h1>Click Game Pro</h1>
+<div id="menu" class="screen">
+ <div class="panel">
+  <p>Klik zo snel mogelijk op de target en test makkelijk met een kortere timer.</p>
 
- <button onclick="toggleShop()">Shop</button>
- <button onclick="startGame()">Start Game</button>
+ <div class="timeControl">
+  <label for="gameDurationInput">Tijd in seconden</label>
+  <input id="gameDurationInput" type="number" min="5" max="300" step="5" onchange="setGameDuration(this.value)">
+ </div>
 
- <div id="shop">
-  <h3>SKINS</h3>
-  <button onclick="buySkin('red')">Red (10)</button>
-  <button onclick="buySkin('neon')">Neon (20)</button>
-  <button onclick="buySkin('gold')">Gold (30)</button>
+ <div class="controlsRow">
+  <button class="secondaryButton" onclick="toggleShop('shop')">Shop / Inventory</button>
+  <button class="secondaryButton" onclick="toggleShop('profile')">Profiel</button>
+  <button onclick="startGame()">Start Game</button>
+ </div>
+
+ <div id="shop" class="storePanel"></div>
+ <div id="profile" class="storePanel"></div>
  </div>
 </div>
 
 <!-- GAME -->
 <div id="gameUI">
+ <div id="bossHud">
+  <div id="bossHudLabel">Boss HP</div>
+  <div class="progressBar"><div id="bossHealthFill" class="progressFill" style="width:100%;"></div></div>
+ </div>
  <p id="score">Score: 0</p>
  <p id="coins">Coins: 0</p>
  <p id="highscore">Highscore: 0</p>
@@ -90,30 +978,80 @@ button {
  <button onclick="togglePause()">Pause</button>
 
  <div id="gameArea">
-  <div id="target"></div>
+  <div id="darknessOverlay"></div>
+  <div id="streakText"></div>
+  <div id="customCursor"></div>
+  <div id="target" class="targetOrb"></div>
+  <div id="targetBoss" class="targetOrb"></div>
+  <div id="splitTargetA" class="targetOrb miniTarget"></div>
+  <div id="splitTargetB" class="targetOrb miniTarget"></div>
+  <div id="bonusCrate" title="Bonus crate"></div>
  </div>
 </div>
 
 <!-- GAME OVER -->
-<div id="gameOver" style="
- display:none;
- position:absolute;
- inset:0;
- background:rgba(0,0,0,0.85);
- flex-direction:column;
- justify-content:center;
- align-items:center;
-">
+<div id="gameOver" class="screen">
+ <div class="panel">
  <h1>Game Over</h1>
  <p id="finalScore"></p>
+ <p id="finalCoins"></p>
+ <p id="finalHighscore"></p>
+ <p id="finalCrates"></p>
+ <div class="timeControl">
+  <label for="gameDurationInputGameOver">Tijd in seconden</label>
+  <input id="gameDurationInputGameOver" type="number" min="5" max="300" step="5" onchange="setGameDuration(this.value)">
+ </div>
 
- <button onclick="restart()">Play Again</button>
+ <div class="controlsRow">
+  <button onclick="restart()">Play Again</button>
+  <button class="secondaryButton" onclick="toggleShop('shop2')">Shop / Inventory</button>
+  <button class="secondaryButton" onclick="toggleShop('profile2')">Profiel</button>
+ </div>
 
- <div id="shop2">
-  <h3>SKINS</h3>
-  <button onclick="buySkin('red')">Red (10)</button>
-  <button onclick="buySkin('neon')">Neon (20)</button>
-  <button onclick="buySkin('gold')">Gold (30)</button>
+ <div id="shop2" class="storePanel"></div>
+ <div id="profile2" class="storePanel"></div>
+ </div>
+</div>
+
+<div id="feedback"></div>
+<div id="wheelOverlay">
+ <div class="wheelModal">
+  <h2>Lucky Wheel</h2>
+  <p>Draai aan het wiel en pak je reward.</p>
+  <div class="wheelStage">
+   <div class="wheelPointer"></div>
+   <div id="wheelDisc" class="wheelDisc"></div>
+   <div class="wheelCenter"></div>
+  </div>
+  <p id="wheelResult" class="wheelResult">Klaar om te spinnen.</p>
+  <button id="wheelCloseButton" class="secondaryButton" onclick="closeWheelOverlay()">Sluiten</button>
+ </div>
+</div>
+<div id="crateOverlay">
+ <div class="crateModal">
+  <h2>Crate Opening</h2>
+  <div id="crateBox" class="crateBox">
+   <div class="crateLid"></div>
+   <div class="crateBody"></div>
+   <div class="crateShards">
+    <div class="crateShard s1"></div>
+    <div class="crateShard s2"></div>
+    <div class="crateShard s3"></div>
+    <div class="crateShard s4"></div>
+    <div class="crateShard s5"></div>
+    <div class="crateShard s6"></div>
+   </div>
+  </div>
+  <div id="crateFlash" class="crateFlash"></div>
+  <p id="crateRevealText" class="wheelResult">De crate opent...</p>
+  <button id="crateCloseButton" class="secondaryButton" onclick="closeCrateOverlay()">Sluiten</button>
+ </div>
+</div>
+<div id="legendaryOverlay">
+ <div class="legendaryModal">
+  <h1>Legendary!</h1>
+  <p id="legendaryText">Je hebt een legendary reward!</p>
+  <button class="secondaryButton" onclick="closeLegendaryOverlay()">Doorgaan</button>
  </div>
 </div>
 
@@ -121,28 +1059,180 @@ button {
 let score = 0;
 let coins = parseInt(localStorage.getItem("coins")) || 0;
 let highscore = parseInt(localStorage.getItem("highscore")) || 0;
-
-let timeLeft = 30;
+let gameDuration = parseInt(localStorage.getItem("gameDuration")) || 30;
+let timeLeft = gameDuration;
 let gameRunning = false;
 let paused = false;
-
-let skin = "default";
+let feedbackTimeout;
 
 let timerInterval;
 let moveTimeout;
+let enemyDespawnTimeout;
+let splitDespawnTimeout;
+let bonusSpawnTimeout;
+let bonusHideTimeout;
+
+const RARITY_META = {
+ common: { label:"Common", className:"rarity-common", crateStyle:"linear-gradient(135deg,#95a5a6,#7f8c8d)" },
+ rare: { label:"Rare", className:"rarity-rare", crateStyle:"linear-gradient(135deg,#5dade2,#2980b9)" },
+ epic: { label:"Epic", className:"rarity-epic", crateStyle:"linear-gradient(135deg,#c39bd3,#8e44ad)" },
+ legendary: { label:"Legendary", className:"rarity-legendary", crateStyle:"linear-gradient(135deg,#f8c471,#d35400)" }
+};
+
+const SKINS = [
+ { id:"default", name:"Default", price:0, rarity:"common", style:{ background:"#2ecc71", boxShadow:"0 0 14px rgba(46,204,113,0.65)", border:"2px solid rgba(255,255,255,0.2)" } },
+ { id:"red", name:"Red Fury", price:10, rarity:"common", style:{ background:"#e74c3c", boxShadow:"0 0 18px rgba(231,76,60,0.7)", border:"2px solid rgba(255,255,255,0.2)" } },
+ { id:"neon", name:"Neon Pulse", price:20, rarity:"rare", style:{ background:"linear-gradient(45deg,#7f00ff,#00f7ff)", boxShadow:"0 0 18px rgba(0,247,255,0.7)", border:"2px solid rgba(255,255,255,0.28)" } },
+ { id:"gold", name:"Gold Rush", price:30, rarity:"rare", style:{ background:"linear-gradient(135deg,#ffd54f,#f39c12)", boxShadow:"0 0 18px rgba(255,215,64,0.75)", border:"2px solid rgba(255,255,255,0.3)" } },
+ { id:"lava", name:"Lava Core", price:35, rarity:"rare", style:{ background:"linear-gradient(135deg,#2c0b00,#ff5a1f,#ffb347)", boxShadow:"0 0 18px rgba(255,90,31,0.7)", border:"2px solid rgba(255,220,180,0.25)" } },
+ { id:"ice", name:"Ice Storm", price:35, rarity:"rare", style:{ background:"linear-gradient(135deg,#dff6ff,#7dd3fc,#2563eb)", boxShadow:"0 0 18px rgba(125,211,252,0.7)", border:"2px solid rgba(255,255,255,0.35)" } },
+ { id:"galaxy", name:"Galaxy Spin", price:40, rarity:"epic", style:{ background:"radial-gradient(circle at 30% 30%,#fff 0%,#b388ff 12%,#4c1d95 40%,#09090f 100%)", boxShadow:"0 0 18px rgba(179,136,255,0.7)", border:"2px solid rgba(255,255,255,0.28)" } },
+ { id:"toxic", name:"Toxic Slime", price:40, rarity:"rare", style:{ background:"linear-gradient(135deg,#d4ff00,#60d600,#0b6623)", boxShadow:"0 0 18px rgba(166,255,0,0.75)", border:"2px solid rgba(255,255,255,0.22)" } },
+ { id:"sunset", name:"Sunset Wave", price:45, rarity:"epic", style:{ background:"linear-gradient(135deg,#ff9966,#ff5e62,#6a11cb)", boxShadow:"0 0 18px rgba(255,94,98,0.65)", border:"2px solid rgba(255,255,255,0.22)" } },
+ { id:"candy", name:"Candy Pop", price:45, rarity:"epic", style:{ background:"linear-gradient(135deg,#ff8ad8,#ffc1f3,#8be9fd)", boxShadow:"0 0 18px rgba(255,138,216,0.65)", border:"2px solid rgba(255,255,255,0.32)" } },
+ { id:"shadow", name:"Shadow Void", price:50, rarity:"epic", style:{ background:"linear-gradient(135deg,#0f172a,#111827,#374151)", boxShadow:"0 0 20px rgba(148,163,184,0.5)", border:"2px solid rgba(255,255,255,0.18)" } },
+ { id:"plasma", name:"Plasma Bolt", price:55, rarity:"legendary", style:{ background:"linear-gradient(135deg,#ff00c8,#ff6a00,#ffee00)", boxShadow:"0 0 20px rgba(255,106,0,0.7)", border:"2px solid rgba(255,255,255,0.22)" } },
+ { id:"crystal", name:"Crystal Prism", price:55, rarity:"epic", style:{ background:"linear-gradient(135deg,#e0f2fe,#c084fc,#67e8f9)", boxShadow:"0 0 20px rgba(103,232,249,0.7)", border:"2px solid rgba(255,255,255,0.34)" } },
+ { id:"matrix", name:"Matrix Code", price:60, rarity:"legendary", style:{ background:"linear-gradient(135deg,#03170a,#0f0,#0b3d0b)", boxShadow:"0 0 20px rgba(0,255,102,0.7)", border:"2px solid rgba(255,255,255,0.22)" } }
+];
+
+const CRATES = [
+ { id:"common", name:"Street Crate", rarity:"common", price:20, coinRange:[8,18], skinRarities:["common","rare"], skinChance:0.28 },
+ { id:"rare", name:"Storm Crate", rarity:"rare", price:40, coinRange:[16,30], skinRarities:["rare","epic"], skinChance:0.42 },
+ { id:"epic", name:"Nova Crate", rarity:"epic", price:70, coinRange:[28,48], skinRarities:["epic","legendary"], skinChance:0.58 },
+ { id:"legendary", name:"Mythic Crate", rarity:"legendary", price:110, coinRange:[45,80], skinRarities:["legendary"], skinChance:0.8 }
+];
+
+const MISSIONS = [
+ { id:"click25", name:"Klik 25 targets", description:"Laat je aim zien.", goal:25, metric:"totalClicks", reward:{ coins:25 } },
+ { id:"open3", name:"Open 3 crates", description:"Loot time.", goal:3, metric:"totalCratesOpened", reward:{ crate:"rare" } },
+ { id:"score40", name:"Haal score 40", description:"Zet een sterke run neer.", goal:40, metric:"bestScore", reward:{ coins:40, xp:20 } }
+];
+
+const ACHIEVEMENTS = [
+ { id:"hundredClicks", name:"Centurion", description:"Klik 100 targets.", check:()=> playerStats.totalClicks >= 100 },
+ { id:"firstLegendary", name:"Legend Hunter", description:"Unlock je eerste legendary skin.", check:()=> playerStats.legendaryUnlocked },
+ { id:"crateMaster", name:"Crate Master", description:"Open 10 crates.", check:()=> playerStats.totalCratesOpened >= 10 },
+ { id:"levelFive", name:"On A Roll", description:"Bereik level 5.", check:()=> level >= 5 }
+];
+
+const THEMES = {
+ classic: { label:"Classic", pageBg:"linear-gradient(180deg,#3498db 0%,#21618c 100%)", arenaBg:"#2980b9" },
+ cyber: { label:"Cyber", pageBg:"linear-gradient(180deg,#0f172a 0%,#1d4ed8 100%)", arenaBg:"#111827" },
+ lava: { label:"Lava", pageBg:"linear-gradient(180deg,#3b0a00 0%,#b91c1c 100%)", arenaBg:"#7c2d12" },
+ ice: { label:"Ice", pageBg:"linear-gradient(180deg,#0f766e 0%,#60a5fa 100%)", arenaBg:"#1d4ed8" },
+ galaxy: { label:"Galaxy", pageBg:"linear-gradient(180deg,#1e1b4b 0%,#6d28d9 100%)", arenaBg:"#312e81" }
+};
+
+const ROUND_MODIFIERS = [
+ { id:"wind", label:"Wind", description:"Targets glijden extra horizontaal." },
+ { id:"low_gravity", label:"Low Gravity", description:"Targets zweven trager en hoger." },
+ { id:"chaos", label:"Chaos", description:"Meer rare target types en snellere flow." },
+ { id:"darkness", label:"Darkness", description:"Arena wordt donkerder." }
+];
+
+const RUN_OBJECTIVES = [
+ { id:"moving_targets", label:"Hit 10 moving targets", goal:10, reward:25 },
+ { id:"no_miss", label:"No misses", goal:1, reward:35 },
+ { id:"boss_fast", label:"Kill the boss fast", goal:1, reward:45 }
+];
+
+let ownedSkins = JSON.parse(localStorage.getItem("ownedSkins") || "[\"default\"]");
+if(!ownedSkins.includes("default")){
+ ownedSkins.unshift("default");
+}
+
+let ownedCrates = JSON.parse(localStorage.getItem("ownedCrates") || "{\"common\":0,\"rare\":0,\"epic\":0,\"legendary\":0}");
+ownedCrates = {
+ common: ownedCrates.common || 0,
+ rare: ownedCrates.rare || 0,
+ epic: ownedCrates.epic || 0,
+ legendary: ownedCrates.legendary || 0
+};
+
+let playerStats = JSON.parse(localStorage.getItem("playerStats") || "{\"totalClicks\":0,\"totalCratesOpened\":0,\"bestScore\":0,\"gamesPlayed\":0,\"legendaryUnlocked\":false,\"wheelSpins\":0,\"bestAccuracy\":0}");
+playerStats.bestAccuracy = playerStats.bestAccuracy || 0;
+let claimedMissions = JSON.parse(localStorage.getItem("claimedMissions") || "{}");
+let xp = parseInt(localStorage.getItem("xp")) || 0;
+let level = parseInt(localStorage.getItem("level")) || 1;
+let lastDailyClaim = localStorage.getItem("lastDailyClaim") || "";
+let lastWheelSpin = parseInt(localStorage.getItem("lastWheelSpin")) || 0;
+let isBossRound = false;
+let pendingRunCrates = [];
+let wheelSpinning = false;
+let wheelRotation = 0;
+let godMode = localStorage.getItem("godMode") === "true";
+let currentTheme = localStorage.getItem("theme") || "classic";
+let leaderboard = JSON.parse(localStorage.getItem("leaderboard") || "[]");
+let bossHealth = 0;
+let bossMaxHealth = 0;
+let streak = 0;
+let lastHitAt = 0;
+let crateAnimating = false;
+let pendingCrateReward = null;
+let crateClicksNeeded = 0;
+let currentTargetType = "normal";
+let currentModifier = null;
+let currentObjective = null;
+let shotsFired = 0;
+let hitsLanded = 0;
+let missCount = 0;
+let movingTargetHits = 0;
+let bossStartTime = 0;
+let survivalMode = localStorage.getItem("survivalMode") === "true";
+let splitTargetsActive = false;
+let eliteCrateActive = false;
+
+let skin = localStorage.getItem("selectedSkin") || "default";
+if(!ownedSkins.includes(skin)){
+ skin = "default";
+}
+if(ownedSkins.some((skinId)=> {
+ const data = SKINS.find((item)=> item.id === skinId);
+ return data && data.rarity === "legendary";
+})){
+ playerStats.legendaryUnlocked = true;
+}
 
 const menu = document.getElementById("menu");
 const gameUI = document.getElementById("gameUI");
 const gameOver = document.getElementById("gameOver");
+const gameArea = document.getElementById("gameArea");
+const customCursor = document.getElementById("customCursor");
+const darknessOverlay = document.getElementById("darknessOverlay");
 const target = document.getElementById("target");
-
-document.getElementById("coins").innerText = "Coins: " + coins;
-document.getElementById("highscore").innerText = "Highscore: " + highscore;
+const targetBoss = document.getElementById("targetBoss");
+const splitTargetA = document.getElementById("splitTargetA");
+const splitTargetB = document.getElementById("splitTargetB");
+const bonusCrate = document.getElementById("bonusCrate");
+const feedback = document.getElementById("feedback");
+const bossHud = document.getElementById("bossHud");
+const bossHealthFill = document.getElementById("bossHealthFill");
+const streakText = document.getElementById("streakText");
+const wheelOverlay = document.getElementById("wheelOverlay");
+const wheelDisc = document.getElementById("wheelDisc");
+const wheelResult = document.getElementById("wheelResult");
+const wheelCloseButton = document.getElementById("wheelCloseButton");
+const crateOverlay = document.getElementById("crateOverlay");
+const crateBox = document.getElementById("crateBox");
+const crateFlash = document.getElementById("crateFlash");
+const crateRevealText = document.getElementById("crateRevealText");
+const crateCloseButton = document.getElementById("crateCloseButton");
+const legendaryOverlay = document.getElementById("legendaryOverlay");
+const legendaryText = document.getElementById("legendaryText");
+const durationInputs = [
+ document.getElementById("gameDurationInput"),
+ document.getElementById("gameDurationInputGameOver")
+];
 
 /* SHOP */
-function toggleShop(){
- const shop = document.getElementById("shop");
- shop.style.display = shop.style.display === "block" ? "none" : "block";
+function toggleShop(id){
+ const panel = document.getElementById(id);
+ const shouldOpen = panel.style.display !== "block";
+ document.querySelectorAll(".storePanel").forEach((store)=> {
+  store.style.display = "none";
+ });
+ panel.style.display = shouldOpen ? "block" : "none";
 }
 
 /* START */
@@ -150,23 +1240,59 @@ function startGame(){
  menu.style.display = "none";
  gameUI.style.display = "block";
  gameOver.style.display = "none";
+ document.querySelectorAll(".storePanel").forEach((store)=> {
+  store.style.display = "none";
+ });
+ clearTimeout(bonusSpawnTimeout);
+ clearTimeout(bonusHideTimeout);
+ bonusCrate.style.display = "none";
+ targetBoss.style.display = "none";
+ splitTargetA.style.display = "none";
+ splitTargetB.style.display = "none";
+ darknessOverlay.style.display = "none";
+ customCursor.style.display = "none";
+ pendingRunCrates = [];
 
- document.getElementById("shop").style.display = "none";
-
+ playerStats.gamesPlayed = (playerStats.gamesPlayed || 0) + 1;
+ isBossRound = playerStats.gamesPlayed % 5 === 0;
+ bossMaxHealth = isBossRound ? 18 : 0;
+ bossHealth = bossMaxHealth;
+ bossStartTime = Date.now();
+ streak = 0;
+ lastHitAt = 0;
+ shotsFired = 0;
+ hitsLanded = 0;
+ missCount = 0;
+ movingTargetHits = 0;
+ splitTargetsActive = false;
+ eliteCrateActive = false;
+ currentModifier = ROUND_MODIFIERS[Math.floor(Math.random() * ROUND_MODIFIERS.length)];
+ currentObjective = RUN_OBJECTIVES[Math.floor(Math.random() * RUN_OBJECTIVES.length)];
  score = 0;
- timeLeft = 30;
+ timeLeft = gameDuration;
  paused = false;
  gameRunning = true;
 
  updateUI();
+ applySkin();
+ if(isBossRound){
+  showFeedback("Boss round! Meer leven en sneller tempo.", "success");
+  playSound("boss");
+ }
 
  timer();
  spawnTarget();
+ scheduleBonusCrate();
 }
 
 /* TIMER */
 function timer(){
  clearInterval(timerInterval);
+
+ if(survivalMode){
+  document.getElementById("timer").innerText = "Tijd: Survival";
+  return;
+ }
 
  timerInterval = setInterval(()=>{
   if(!gameRunning || paused) return;
@@ -181,35 +1307,251 @@ function timer(){
 }
 
 /* TARGET */
-function spawnTarget(){
- if(!gameRunning || paused) return;
-
- const w = gameUI.clientWidth;
+function moveOrb(orb, size, minDuration, maxDuration){
+ const w = gameArea.clientWidth;
  const h = gameArea.clientHeight;
+ let duration = Math.floor(minDuration + Math.random() * (maxDuration - minDuration));
+ if(survivalMode){
+  duration = Math.max(350, duration - score * 8);
+ }
+ if(currentModifier && currentModifier.id === "chaos"){
+  duration = Math.max(320, duration - 280);
+ }
 
- target.style.display = "block";
- target.style.left = Math.random()*(w-60)+"px";
- target.style.top = Math.random()*(h-60)+"px";
+ orb.style.display = "block";
+ orb.style.transitionDuration = `${duration}ms, ${duration}ms, 0.12s, 0.2s, 0.2s`;
+ let x = Math.random() * (w - size);
+ let y = Math.random() * (h - size);
+ if(currentModifier && currentModifier.id === "wind"){
+  x = Math.min(w - size, Math.max(0, x + (Math.random() < 0.5 ? -120 : 120)));
+ }
+ if(currentModifier && currentModifier.id === "low_gravity"){
+  y = Math.random() * ((h - size) * 0.55);
+ }
+ orb.style.left = x + "px";
+ orb.style.top = y + "px";
+ return duration;
+}
 
- if(skin === "red") target.style.background = "#e74c3c";
- else if(skin === "neon") target.style.background = "linear-gradient(45deg,purple,cyan)";
- else if(skin === "gold") target.style.background = "gold";
- else target.style.background = "#2ecc71";
+function chooseTargetType(){
+ const roll = Math.random();
+ if(currentModifier && currentModifier.id === "chaos"){
+  if(roll < 0.18) return "gold";
+  if(roll < 0.34) return "ghost";
+  if(roll < 0.46) return "bomb";
+  if(roll < 0.6) return "split";
+  return "normal";
+ }
+ if(roll < 0.1) return "gold";
+ if(roll < 0.18) return "ghost";
+ if(roll < 0.24) return "bomb";
+ if(roll < 0.3) return "split";
+ return "normal";
+}
 
+function styleMainTarget(type){
+ currentTargetType = type;
+ target.classList.remove("miniTarget");
+ target.style.opacity = "1";
+ target.innerHTML = "";
+ target.style.fontSize = "0px";
+ target.style.letterSpacing = "0";
+ target.style.textShadow = "none";
+  target.style.background = "#2ecc71";
+  target.style.boxShadow = "0 0 14px rgba(46,204,113,0.65)";
+  target.style.border = "2px solid rgba(255,255,255,0.2)";
+  applySkin();
+  if(type === "gold"){
+  target.style.background = "linear-gradient(135deg,#fff2a8,#f39c12)";
+  target.style.boxShadow = "0 0 22px rgba(255,215,64,0.85)";
+ }
+ else if(type === "ghost"){
+  target.style.background = "radial-gradient(circle,#dbeafe,#93c5fd,#60a5fa)";
+  target.style.boxShadow = "0 0 20px rgba(147,197,253,0.7)";
+  target.style.opacity = "0.74";
+ }
+  else if(type === "bomb"){
+  target.style.background = "radial-gradient(circle at 35% 30%, #9ca3af 0 10%, #111827 12% 100%)";
+  target.style.boxShadow = "0 0 28px rgba(239,68,68,0.95)";
+  target.style.border = "4px solid rgba(248,113,113,0.98)";
+  target.textContent = "BOMB";
+  target.style.fontSize = "12px";
+  target.style.letterSpacing = "1px";
+  target.style.color = "#fee2e2";
+  target.style.textShadow = "0 0 10px rgba(239,68,68,0.95)";
+  target.style.position = "absolute";
+  target.innerHTML = '<div style="position:absolute;top:-10px;right:10px;width:6px;height:18px;background:#f59e0b;border-radius:999px;transform:rotate(-28deg);box-shadow:0 0 10px rgba(251,191,36,0.9);"></div><div style="position:absolute;top:-16px;right:1px;font-size:18px;color:#fde68a;text-shadow:0 0 12px rgba(251,191,36,1);">✦</div><div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-weight:900;">BOMB</div>';
+  }
+  else if(type === "split"){
+  target.style.background = "linear-gradient(135deg,#fb7185,#f97316,#fde047)";
+  target.style.boxShadow = "0 0 20px rgba(251,113,133,0.65)";
+  }
+}
+
+function spawnSplitTargets(){
+ splitTargetsActive = true;
+ splitTargetB.style.display = "none";
+ moveOrb(splitTargetA, 30, 700, 1300);
+ splitTargetA.style.background = "linear-gradient(135deg,#34d399,#22c55e)";
+ splitTargetA.style.boxShadow = "0 0 14px rgba(52,211,153,0.6)";
+ splitTargetA.style.border = "2px solid rgba(255,255,255,0.22)";
+ clearTimeout(splitDespawnTimeout);
+ splitDespawnTimeout = setTimeout(()=> {
+  if(!splitTargetsActive) return;
+  splitTargetsActive = false;
+  splitTargetA.style.display = "none";
+  queueNextTarget(180);
+ }, 1200);
+}
+
+function hasActiveEnemy(){
+ return target.style.display === "block" || targetBoss.style.display === "block" || splitTargetsActive;
+}
+
+function queueNextTarget(delay = 180){
  clearTimeout(moveTimeout);
- moveTimeout = setTimeout(spawnTarget, 1200);
+ moveTimeout = setTimeout(()=> {
+  if(!gameRunning || paused || hasActiveEnemy()) return;
+  spawnTarget();
+ }, delay);
+}
+
+function clearEnemyTimers(){
+ clearTimeout(moveTimeout);
+ clearTimeout(enemyDespawnTimeout);
+ clearTimeout(splitDespawnTimeout);
+}
+
+function scheduleEnemyDespawn(delay){
+ clearTimeout(enemyDespawnTimeout);
+ enemyDespawnTimeout = setTimeout(()=> {
+  if(!gameRunning || paused || target.style.display !== "block") return;
+  target.style.display = "none";
+  queueNextTarget(180);
+ }, delay);
+}
+
+function spawnTarget(){
+ if(!gameRunning || paused || hasActiveEnemy()) return;
+
+ const targetType = chooseTargetType();
+  styleMainTarget(targetType);
+ const duration = moveOrb(target, 60, 1400, 2800);
+ if(targetType === "bomb"){
+  scheduleEnemyDespawn(800);
+ }
+ else if(targetType === "ghost"){
+  scheduleEnemyDespawn(650);
+ }
+ else {
+  scheduleEnemyDespawn(duration + 300);
+ }
+ targetBoss.style.display = "none";
+
+ darknessOverlay.style.display = currentModifier && currentModifier.id === "darkness" ? "block" : "none";
 }
 
 /* CLICK */
-target.onclick = function(){
+function handleTargetHit(event, bonusMultiplier){
  if(!gameRunning || paused) return;
 
- score++;
- coins++;
+ const now = Date.now();
+ streak = now - lastHitAt < 1600 ? streak + 1 : 1;
+ lastHitAt = now;
+ shotsFired++;
+ hitsLanded++;
+ movingTargetHits++;
+
+ if(currentTargetType === "bomb"){
+  score = Math.max(0, score - 3);
+  coins = Math.max(0, coins - 5);
+  missCount++;
+  showFeedback("Bomb target! Min coins.", "error");
+  target.style.display = "none";
+  clearTimeout(enemyDespawnTimeout);
+  updateUI();
+  queueNextTarget(240);
+  return;
+ }
+
+ let scoreGain = bonusMultiplier;
+ let coinGain = bonusMultiplier;
+ if(currentTargetType === "gold"){
+  coinGain += 6;
+ }
+ if(currentTargetType === "ghost"){
+  scoreGain += 1;
+ }
+
+ score += scoreGain;
+ coins += coinGain;
+ playerStats.totalClicks += 1;
+ addXp(5 * bonusMultiplier);
+ spawnParticles(event.clientX, event.clientY, "#ffffff", 10);
+ playSound("click");
+ updateStreakCue();
+
+ if(isBossRound){
+  bossHealth = Math.max(0, bossHealth - bonusMultiplier);
+  if(bossHealth === 0){
+   coins += 25;
+   addCrate("rare", 1);
+   showFeedback("Boss verslagen! Bonus coins en crate.", "success");
+   playSound("levelup");
+   isBossRound = false;
+   targetBoss.style.display = "none";
+  }
+ }
+
+ target.style.display = "none";
+ clearTimeout(enemyDespawnTimeout);
+ if(currentTargetType === "split"){
+  spawnSplitTargets();
+ }
 
  updateUI();
- spawnTarget();
+ if(currentTargetType !== "split"){
+  queueNextTarget(180);
+ }
 }
+
+target.onclick = function(event){
+ handleTargetHit(event, 1);
+}
+
+targetBoss.onclick = function(event){
+ handleTargetHit(event, 2);
+}
+
+function handleSplitMiniHit(event){
+ if(!gameRunning || paused || !splitTargetsActive) return;
+ shotsFired++;
+ hitsLanded++;
+ score += 1;
+ coins += 2;
+ addXp(4);
+ spawnParticles(event.clientX, event.clientY, "#86efac", 8);
+ playSound("click");
+ event.currentTarget.style.display = "none";
+ if(splitTargetA.style.display === "none"){
+  splitTargetsActive = false;
+  clearTimeout(splitDespawnTimeout);
+  queueNextTarget(180);
+ }
+ updateUI();
+}
+
+splitTargetA.onclick = handleSplitMiniHit;
+splitTargetB.onclick = handleSplitMiniHit;
+
+gameArea.addEventListener("click", (event)=> {
+ if(!gameRunning || paused) return;
+ const hitIds = ["target","targetBoss","splitTargetA","splitTargetB","bonusCrate"];
+ if(hitIds.includes(event.target.id)) return;
+ shotsFired++;
+ missCount++;
+ updateUI();
+});
 
 /* PAUSE */
 function togglePause(){
@@ -219,29 +1561,108 @@ function togglePause(){
 
  if(paused){
   clearInterval(timerInterval);
-  clearTimeout(moveTimeout);
+  clearEnemyTimers();
+  clearTimeout(bonusSpawnTimeout);
+  clearTimeout(bonusHideTimeout);
+  bonusCrate.style.display = "none";
+  customCursor.style.display = "none";
  }
  else {
   timer();
-  spawnTarget();
+  if(!hasActiveEnemy()){
+   spawnTarget();
+  }
+  scheduleBonusCrate();
  }
 }
 
 /* BUY SKIN */
-function buySkin(type){
- if(type === "red" && coins >= 10){
-  coins -= 10;
-  skin = "red";
- }
- if(type === "neon" && coins >= 20){
-  coins -= 20;
-  skin = "neon";
- }
- if(type === "gold" && coins >= 30){
-  coins -= 30;
-  skin = "gold";
+function handleSkinAction(type, button){
+ const skinData = SKINS.find((item)=> item.id === type);
+ if(!skinData) return;
+
+ animateButton(button);
+
+ if(ownedSkins.includes(type)){
+  skin = type;
+  showFeedback(skinData.name + " geselecteerd.", "success");
+  updateUI();
+  return;
  }
 
+ if(coins < skinData.price){
+  showFeedback("Niet genoeg coins voor " + skinData.name + ".", "error");
+  updateUI();
+  return;
+ }
+
+ coins -= skinData.price;
+ grantSkin(type, true);
+
+ showFeedback("Koop gelukt: " + skinData.name + " unlocked!", "success");
+ playSound("reward");
+ updateUI();
+}
+
+function handleCratePurchase(crateId, button){
+ const crateData = CRATES.find((item)=> item.id === crateId);
+ if(!crateData) return;
+
+ animateButton(button);
+
+ if(coins < crateData.price){
+  showFeedback("Niet genoeg coins voor de " + crateData.name + ".", "error");
+  updateUI();
+  return;
+ }
+
+ coins -= crateData.price;
+ addCrate(crateId, 1);
+ showFeedback("Je kocht een " + crateData.name + ".", "success");
+ updateUI();
+}
+
+function openCrate(crateId, button){
+ const crateData = CRATES.find((item)=> item.id === crateId);
+ if(!crateData) return;
+
+ animateButton(button);
+
+ if((ownedCrates[crateId] || 0) <= 0){
+  showFeedback("Je hebt geen " + crateData.name + " om te openen.", "error");
+  updateUI();
+  return;
+ }
+
+ ownedCrates[crateId]--;
+ playerStats.totalCratesOpened += 1;
+ addXp(12);
+
+ const reward = rollCrateReward(crateData);
+ let message = crateData.name + " geopend: +" + reward.coins + " coins";
+ if(reward.skin){
+  message += " en " + reward.skin.name + " (" + getRarityLabel(reward.skin.rarity) + ")!";
+ }
+ else if(reward.bonusCrate){
+  message += " en een crate upgrade naar " + getCrateName(reward.bonusCrate) + "!";
+ }
+ else {
+  message += ".";
+ }
+
+ openCrateOverlay();
+ crateAnimating = false;
+ crateClicksNeeded = 3;
+ pendingCrateReward = {
+  message,
+  reward
+ };
+ crateRevealText.textContent = "Klik 3 keer op de crate om hem open te breken.";
+ crateBox.classList.remove("shake","breaking");
+ crateBox.classList.remove("crack-1","crack-2","crack-3","broken","crate-common","crate-rare","crate-epic","crate-legendary");
+ crateFlash.classList.remove("show");
+ crateBox.classList.add("crate-" + crateData.rarity);
+ crateCloseButton.disabled = true;
  updateUI();
 }
 
@@ -250,9 +1671,37 @@ function updateUI(){
  document.getElementById("score").innerText = "Score: " + score;
  document.getElementById("coins").innerText = "Coins: " + coins;
  document.getElementById("highscore").innerText = "Highscore: " + highscore;
+ document.getElementById("finalScore").innerText = "Score: " + score;
+ document.getElementById("finalCoins").innerText = "Coins: " + coins;
+ document.getElementById("finalHighscore").innerText = "Highscore: " + highscore;
+ document.getElementById("finalCrates").innerText = "Crates: " + getTotalCrates();
+ document.getElementById("timer").innerText = survivalMode ? "Tijd: Survival" : "Tijd: " + timeLeft;
+ bossHud.style.display = isBossRound && gameRunning ? "block" : "none";
+ bossHealthFill.style.width = (bossMaxHealth ? (bossHealth / bossMaxHealth) * 100 : 0) + "%";
 
  localStorage.setItem("coins", coins);
  localStorage.setItem("highscore", highscore);
+ localStorage.setItem("ownedSkins", JSON.stringify(ownedSkins));
+ localStorage.setItem("ownedCrates", JSON.stringify(ownedCrates));
+ localStorage.setItem("selectedSkin", skin);
+ localStorage.setItem("gameDuration", gameDuration);
+ localStorage.setItem("playerStats", JSON.stringify(playerStats));
+ localStorage.setItem("claimedMissions", JSON.stringify(claimedMissions));
+ localStorage.setItem("xp", xp);
+ localStorage.setItem("level", level);
+ localStorage.setItem("lastDailyClaim", lastDailyClaim);
+ localStorage.setItem("lastWheelSpin", String(lastWheelSpin));
+ localStorage.setItem("godMode", String(godMode));
+ localStorage.setItem("theme", currentTheme);
+ localStorage.setItem("leaderboard", JSON.stringify(leaderboard));
+ localStorage.setItem("survivalMode", String(survivalMode));
+
+ applyTheme();
+ syncDurationInputs();
+ renderStore("shop");
+ renderStore("shop2");
+ renderProfile("profile");
+ renderProfile("profile2");
 }
 
 /* END GAME */
@@ -261,15 +1710,26 @@ function endGame(){
  paused = false;
 
  clearInterval(timerInterval);
- clearTimeout(moveTimeout);
+ clearEnemyTimers();
+ clearTimeout(bonusSpawnTimeout);
+ clearTimeout(bonusHideTimeout);
 
  target.style.display = "none";
+ targetBoss.style.display = "none";
+ bonusCrate.style.display = "none";
+ customCursor.style.display = "none";
 
  if(score > highscore){
   highscore = score;
  }
-
- document.getElementById("finalScore").innerText = "Score: " + score;
+ playerStats.bestAccuracy = Math.max(playerStats.bestAccuracy || 0, getAccuracyPercent());
+ if(getAccuracyPercent() >= 90){
+  coins += 12;
+ }
+ playerStats.bestScore = Math.max(playerStats.bestScore || 0, score);
+ resolveRunObjective();
+ updateLeaderboard();
+ revealPendingRunCrates();
 
  gameUI.style.display = "none";
  gameOver.style.display = "flex";
@@ -282,6 +1742,953 @@ function restart(){
  gameOver.style.display = "none";
  startGame();
 }
+
+function setGameDuration(value){
+ const parsed = Math.max(5, Math.min(300, parseInt(value) || 30));
+ gameDuration = parsed;
+ if(!gameRunning){
+  timeLeft = gameDuration;
+ }
+ updateUI();
+}
+
+function syncDurationInputs(){
+ durationInputs.forEach((input)=> {
+  input.value = gameDuration;
+ });
+}
+
+function getTodayKey(){
+ const now = new Date();
+ const month = String(now.getMonth() + 1).padStart(2, "0");
+ const day = String(now.getDate()).padStart(2, "0");
+ return now.getFullYear() + "-" + month + "-" + day;
+}
+
+function getXpNeeded(currentLevel){
+ return currentLevel * 35;
+}
+
+function addXp(amount){
+ xp += amount;
+ let levelUps = 0;
+ while(xp >= getXpNeeded(level)){
+  xp -= getXpNeeded(level);
+  level++;
+  levelUps++;
+  coins += 15;
+  if(level % 5 === 0){
+   addCrate("rare", 1);
+  }
+ }
+ if(levelUps > 0){
+  showFeedback("Level up! Je bent nu level " + level + ".", "success");
+  playSound("levelup");
+ }
+}
+
+function grantSkin(skinId, autoEquip){
+ const skinData = SKINS.find((item)=> item.id === skinId);
+ if(!skinData) return null;
+
+ if(!ownedSkins.includes(skinId)){
+  ownedSkins.push(skinId);
+  if(skinData.rarity === "legendary"){
+   playerStats.legendaryUnlocked = true;
+  }
+ }
+
+ if(autoEquip){
+  skin = skinId;
+ }
+
+ return skinData;
+}
+
+function getMissionProgress(mission){
+ const current = playerStats[mission.metric] || 0;
+ return Math.min(current, mission.goal);
+}
+
+function isMissionComplete(mission){
+ return getMissionProgress(mission) >= mission.goal;
+}
+
+function claimMission(missionId, button){
+ const mission = MISSIONS.find((item)=> item.id === missionId);
+ if(!mission) return;
+ animateButton(button);
+
+ if(claimedMissions[missionId]){
+  showFeedback("Deze missie is al geclaimd.", "error");
+  updateUI();
+  return;
+ }
+
+ if(!isMissionComplete(mission)){
+  showFeedback("Missie nog niet voltooid.", "error");
+  updateUI();
+  return;
+ }
+
+ claimedMissions[missionId] = true;
+ if(mission.reward.coins){
+  coins += mission.reward.coins;
+ }
+ if(mission.reward.crate){
+  addCrate(mission.reward.crate, 1);
+ }
+ if(mission.reward.xp){
+  addXp(mission.reward.xp);
+ }
+
+ showFeedback("Missie reward geclaimd: " + mission.name, "success");
+ playSound("reward");
+ updateUI();
+}
+
+function canClaimDailyReward(){
+ return lastDailyClaim !== getTodayKey();
+}
+
+function claimDailyReward(button){
+ animateButton(button);
+ if(!canClaimDailyReward()){
+  showFeedback("Je daily reward is vandaag al geclaimd.", "error");
+  updateUI();
+  return;
+ }
+
+ lastDailyClaim = getTodayKey();
+ const giveCrate = Math.random() < 0.35;
+ let message = "Daily reward: ";
+ if(giveCrate){
+  const crateId = getRandomBonusCrateId();
+  addCrate(crateId, 1);
+  message += getCrateName(crateId);
+ }
+ else {
+  const amount = 20 + Math.floor(Math.random() * 31);
+  coins += amount;
+  message += amount + " coins";
+ }
+ addXp(10);
+ showFeedback(message + "!", "success");
+ playSound("reward");
+ updateUI();
+}
+
+function toggleGodMode(button){
+ animateButton(button);
+ godMode = false;
+ showFeedback("God Mode is tijdelijk uitgeschakeld.", "error");
+ updateUI();
+}
+
+function toggleSurvivalMode(button){
+ if(button){
+  animateButton(button);
+ }
+ survivalMode = !survivalMode;
+ showFeedback("Survival mode " + (survivalMode ? "aan" : "uit") + ".", "success");
+ updateUI();
+}
+
+function grantTestResources(button){
+ animateButton(button);
+ coins += 500;
+ addCrate("common", 3);
+ addCrate("rare", 2);
+ addCrate("epic", 1);
+ addCrate("legendary", 1);
+ xp += 20;
+ showFeedback("Test resources toegevoegd.", "success");
+ updateUI();
+}
+
+function resetTestCooldowns(button){
+ animateButton(button);
+ lastWheelSpin = 0;
+ lastDailyClaim = "";
+ showFeedback("Cooldowns gereset.", "success");
+ updateUI();
+}
+
+function resetGameProgress(button){
+ if(button){
+  animateButton(button);
+ }
+
+ if(!window.confirm("Weet je zeker dat je alle game data wilt resetten?")){
+  return;
+ }
+
+ [
+  "coins",
+  "highscore",
+  "gameDuration",
+  "ownedSkins",
+  "ownedCrates",
+  "selectedSkin",
+  "playerStats",
+  "claimedMissions",
+  "xp",
+  "level",
+  "lastDailyClaim",
+  "lastWheelSpin",
+  "godMode",
+  "theme",
+  "leaderboard",
+  "survivalMode"
+ ].forEach((key)=> localStorage.removeItem(key));
+
+ score = 0;
+ coins = 0;
+ highscore = 0;
+ gameDuration = 30;
+ timeLeft = gameDuration;
+ ownedSkins = ["default"];
+ ownedCrates = { common:0, rare:0, epic:0, legendary:0 };
+ playerStats = { totalClicks:0, totalCratesOpened:0, bestScore:0, gamesPlayed:0, legendaryUnlocked:false, wheelSpins:0, bestAccuracy:0 };
+ claimedMissions = {};
+ xp = 0;
+ level = 1;
+ lastDailyClaim = "";
+ lastWheelSpin = 0;
+ godMode = false;
+ currentTheme = "classic";
+ leaderboard = [];
+ survivalMode = false;
+ skin = "default";
+ pendingRunCrates = [];
+ isBossRound = false;
+ wheelRotation = 0;
+
+ target.style.display = "none";
+ targetBoss.style.display = "none";
+ bonusCrate.style.display = "none";
+
+ showFeedback("Game progress is gereset.", "success");
+ updateUI();
+}
+
+function applyTheme(){
+ const theme = THEMES[currentTheme] || THEMES.classic;
+ document.documentElement.style.setProperty("--page-bg", theme.pageBg);
+ document.documentElement.style.setProperty("--arena-bg", theme.arenaBg);
+}
+
+function setTheme(themeId, button){
+ if(button){
+  animateButton(button);
+ }
+ currentTheme = THEMES[themeId] ? themeId : "classic";
+ showFeedback("Theme gewijzigd naar " + THEMES[currentTheme].label + ".", "success");
+ updateUI();
+}
+
+function updateStreakCue(){
+ let text = "";
+ if(streak >= 12) text = "UNSTOPPABLE";
+ else if(streak >= 7) text = "INSANE";
+ else if(streak >= 4) text = "NICE";
+ if(!text) return;
+ streakText.textContent = text;
+ streakText.classList.add("show");
+ setTimeout(()=> streakText.classList.remove("show"), 700);
+}
+
+function updateLeaderboard(){
+ leaderboard.push({ score, date:new Date().toLocaleDateString("nl-NL") });
+ leaderboard.sort((a,b)=> b.score - a.score);
+ leaderboard = leaderboard.slice(0,5);
+}
+
+function openCrateOverlay(){
+ crateOverlay.classList.add("show");
+ crateCloseButton.disabled = true;
+}
+
+function closeCrateOverlay(){
+ if(crateAnimating) return;
+ crateOverlay.classList.remove("show");
+ crateRevealText.textContent = "De crate opent...";
+ crateFlash.classList.remove("show");
+ crateBox.classList.remove("shake","breaking");
+ crateBox.classList.remove("crack-1","crack-2","crack-3","broken","crate-common","crate-rare","crate-epic","crate-legendary");
+ pendingCrateReward = null;
+ crateClicksNeeded = 0;
+}
+
+function showLegendaryOverlay(text){
+ legendaryText.textContent = text;
+ legendaryOverlay.classList.add("show");
+}
+
+function closeLegendaryOverlay(){
+ legendaryOverlay.classList.remove("show");
+}
+
+function handleCrateBoxClick(){
+ if(crateAnimating || !pendingCrateReward || crateClicksNeeded <= 0) return;
+
+ crateClicksNeeded--;
+ playSound("click");
+ crateRevealText.textContent = crateClicksNeeded > 0
+  ? "Nog " + crateClicksNeeded + " klik" + (crateClicksNeeded === 1 ? "" : "ken") + " om te openen."
+  : "De crate breekt open...";
+
+ crateBox.classList.remove("shake","breaking");
+ crateBox.classList.remove("crack-1","crack-2","crack-3","broken");
+ const crackStage = 3 - crateClicksNeeded;
+ if(crackStage >= 1 && crackStage <= 3){
+  crateBox.classList.add("crack-" + crackStage);
+ }
+ void crateBox.offsetWidth;
+ crateBox.classList.add("shake");
+
+ if(crateClicksNeeded > 0) return;
+
+ crateAnimating = true;
+ crateBox.classList.add("breaking","broken","crack-3");
+ setTimeout(()=> {
+  coins += pendingCrateReward.reward.coins;
+  if(pendingCrateReward.reward.skin){
+   grantSkin(pendingCrateReward.reward.skin.id, true);
+  }
+  else if(pendingCrateReward.reward.bonusCrate){
+   addCrate(pendingCrateReward.reward.bonusCrate, 1);
+  }
+  crateFlash.classList.add("show");
+  crateRevealText.textContent = pendingCrateReward.message;
+  crateAnimating = false;
+  crateCloseButton.disabled = false;
+  playSound("reward");
+  if(pendingCrateReward.reward.skin && pendingCrateReward.reward.skin.rarity === "legendary"){
+   showLegendaryOverlay("Je hebt " + pendingCrateReward.reward.skin.name + " unlocked!");
+  }
+  showFeedback(pendingCrateReward.message, "success");
+  updateUI();
+ }, 1150);
+}
+
+function getWheelCooldownMs(){
+ const cooldown = 1000 * 60 * 30;
+ return Math.max(0, cooldown - (Date.now() - lastWheelSpin));
+}
+
+function formatCooldown(ms){
+ const totalMinutes = Math.ceil(ms / 60000);
+ if(totalMinutes < 60){
+  return totalMinutes + " min";
+ }
+ const hours = Math.floor(totalMinutes / 60);
+ const minutes = totalMinutes % 60;
+  return hours + "u " + minutes + "m";
+}
+
+function buildWheelRewards(){
+ const availableRareSkins = SKINS.filter((item)=> item.price > 0 && !ownedSkins.includes(item.id));
+ return [
+  { label:"+30 coins", color:"#2ecc71", weight:40, apply:()=> { coins += 30; } },
+  { label:"+60 coins", color:"#f1c40f", weight:25, apply:()=> { coins += 60; } },
+  { label:"Street Crate", color:"#3498db", weight:18, apply:()=> addCrate("common", 1) },
+  { label:"Storm Crate", color:"#8e44ad", weight:12, apply:()=> addCrate("rare", 1) },
+  { label:"Gratis skin", color:"#e67e22", weight:5, apply:()=> {
+   if(availableRareSkins.length){
+    const wonSkin = availableRareSkins[Math.floor(Math.random() * availableRareSkins.length)];
+    grantSkin(wonSkin.id, true);
+   }
+   else {
+    coins += 80;
+   }
+  } }
+ ];
+}
+
+function renderWheel(rewards){
+ const segmentSize = 360 / rewards.length;
+ const colors = rewards.map((reward, index)=> {
+  const start = index * segmentSize;
+  const end = start + segmentSize;
+  return `${reward.color} ${start}deg ${end}deg`;
+ }).join(", ");
+
+ wheelDisc.innerHTML = "";
+ wheelDisc.style.background = `conic-gradient(${colors})`;
+
+ rewards.forEach((reward, index)=> {
+  const label = document.createElement("div");
+  label.className = "wheelLabel";
+  const angle = index * segmentSize + segmentSize / 2;
+  label.style.transform = `rotate(${angle}deg) translate(0,-132px) rotate(90deg)`;
+  label.textContent = reward.label;
+  wheelDisc.appendChild(label);
+ });
+}
+
+function openWheelOverlay(){
+ wheelOverlay.classList.add("show");
+ wheelCloseButton.disabled = true;
+}
+
+function closeWheelOverlay(){
+ if(wheelSpinning) return;
+ wheelOverlay.classList.remove("show");
+ wheelResult.textContent = "Klaar om te spinnen.";
+}
+
+function spinLuckyWheel(button){
+ animateButton(button);
+ const remaining = getWheelCooldownMs();
+ if(remaining > 0){
+  showFeedback("Lucky wheel klaar over " + formatCooldown(remaining) + ".", "error");
+  updateUI();
+  return;
+ }
+
+ lastWheelSpin = Date.now();
+ playerStats.wheelSpins = (playerStats.wheelSpins || 0) + 1;
+ const rewards = buildWheelRewards();
+ const reward = weightedChoice(rewards);
+ updateUI();
+
+ renderWheel(rewards);
+ openWheelOverlay();
+ wheelSpinning = true;
+ wheelResult.textContent = "Het wiel draait...";
+
+ const rewardIndex = rewards.indexOf(reward);
+ const segmentSize = 360 / rewards.length;
+ const segmentCenter = rewardIndex * segmentSize + segmentSize / 2;
+ const pointerAngle = 0;
+ const normalizedTarget = (pointerAngle - segmentCenter + 360) % 360;
+ const extraSpins = 360 * (5 + Math.floor(Math.random() * 2));
+ const nextRotation = wheelRotation + extraSpins + normalizedTarget + (Math.random() * (segmentSize * 0.45) - segmentSize * 0.225);
+
+ wheelDisc.style.transition = "none";
+ wheelDisc.style.transform = `rotate(${wheelRotation}deg)`;
+ wheelDisc.getBoundingClientRect();
+
+ requestAnimationFrame(()=> {
+  requestAnimationFrame(()=> {
+   wheelDisc.style.transition = "transform 4.6s cubic-bezier(0.16,0.9,0.12,1)";
+   wheelDisc.style.transform = `rotate(${nextRotation}deg)`;
+   wheelRotation = nextRotation;
+  });
+ });
+
+ setTimeout(()=> {
+  reward.apply();
+  addXp(8);
+  wheelSpinning = false;
+  wheelCloseButton.disabled = false;
+  wheelResult.textContent = "Je won: " + reward.label + "!";
+  showFeedback("Lucky wheel reward: " + reward.label + "!", "success");
+  playSound("reward");
+  updateUI();
+ }, 4800);
+}
+
+function weightedChoice(items){
+ const total = items.reduce((sum, item)=> sum + item.weight, 0);
+ let roll = Math.random() * total;
+ for(const item of items){
+  roll -= item.weight;
+  if(roll <= 0){
+   return item;
+  }
+ }
+ return items[items.length - 1];
+}
+
+function getAchievements(){
+ return ACHIEVEMENTS.map((achievement)=> ({
+  ...achievement,
+  unlocked: achievement.check()
+ }));
+}
+
+function renderStore(containerId){
+ const container = document.getElementById(containerId);
+ const shopItems = SKINS.filter((item)=> item.price > 0 && !ownedSkins.includes(item.id));
+ const inventoryItems = SKINS.filter((item)=> ownedSkins.includes(item.id));
+  const crateMessage = getCrateSummary();
+
+ container.innerHTML = `
+  <div class="shopStats">
+   <strong>Coins: ${coins}</strong>
+   <strong>Crates: ${getTotalCrates()}</strong>
+   <strong>Level: ${level}</strong>
+  </div>
+  <div class="featureSection">
+   <h3>Missions</h3>
+   ${MISSIONS.map((mission)=> `
+    <div class="missionItem">
+     <h4>${mission.name}</h4>
+     <p>${mission.description}</p>
+     <p>Voortgang: ${getMissionProgress(mission)}/${mission.goal}</p>
+     <button onclick="claimMission('${mission.id}', this)">${claimedMissions[mission.id] ? "Geclaimd" : isMissionComplete(mission) ? "Claim reward" : "Nog bezig"}</button>
+    </div>
+   `).join("")}
+  </div>
+  <h3>Shop</h3>
+  <div class="storeGrid">
+   ${shopItems.length ? shopItems.map((item)=> `
+    <div class="skinCard">
+     <div class="rarityTag ${RARITY_META[item.rarity].className}">${getRarityLabel(item.rarity)}</div>
+     <div class="skinPreview" style="${getPreviewStyle(item)}"></div>
+     <h4>${item.name}</h4>
+     <p>${item.price} coins</p>
+     <button onclick="handleSkinAction('${item.id}', this)">Koop skin</button>
+    </div>
+   `).join("") : `<div class="emptyState">Alle skins zijn gekocht. Lekker bezig.</div>`}
+  </div>
+  <h3 style="margin-top:18px;">Crate Shop</h3>
+  <div class="storeGrid">
+   ${CRATES.map((crate)=> `
+    <div class="crateCard">
+     <div class="rarityTag ${RARITY_META[crate.rarity].className}">${getRarityLabel(crate.rarity)}</div>
+     <div class="cratePreview" style="${getCratePreviewStyle(crate)}"></div>
+     <h4>${crate.name}</h4>
+     <p>${crate.price} coins</p>
+     <p>Skin kans: ${Math.round(crate.skinChance * 100)}%</p>
+     <button onclick="handleCratePurchase('${crate.id}', this)">Koop crate</button>
+    </div>
+   `).join("")}
+  </div>
+  <h3 style="margin-top:18px;">Inventory</h3>
+  <div class="storeGrid">
+   ${inventoryItems.map((item)=> `
+    <div class="skinCard">
+     ${item.id === skin ? `<div class="ownedTag">Actief</div>` : `<div class="ownedTag">Owned</div>`}
+     <div class="rarityTag ${RARITY_META[item.rarity].className}">${getRarityLabel(item.rarity)}</div>
+     <div class="skinPreview" style="${getPreviewStyle(item)}"></div>
+     <h4>${item.name}</h4>
+     <p>${item.id === "default" ? "Gratis skin" : "Unlocked"}</p>
+     <button onclick="handleSkinAction('${item.id}', this)">${item.id === skin ? "Geselecteerd" : "Gebruik skin"}</button>
+    </div>
+   `).join("")}
+  </div>
+  <h3 style="margin-top:18px;">Crate Inventory</h3>
+  <div class="storeGrid">
+   ${CRATES.map((crate)=> `
+    <div class="crateCard">
+     <div class="rarityTag ${RARITY_META[crate.rarity].className}">${getRarityLabel(crate.rarity)}</div>
+     <div class="cratePreview" style="${getCratePreviewStyle(crate)}"></div>
+     <h4>${crate.name}</h4>
+     <p>In inventory: ${ownedCrates[crate.id] || 0}</p>
+     <button onclick="openCrate('${crate.id}', this)">Open crate</button>
+    </div>
+   `).join("")}
+  </div>
+  <div class="shopMessage ${feedback.classList.contains("error") ? "error" : "success"}">${feedback.dataset.message || crateMessage}</div>
+ `;
+}
+
+function renderProfile(containerId){
+ const container = document.getElementById(containerId);
+ const dailyReady = canClaimDailyReward();
+ const wheelCooldown = getWheelCooldownMs();
+ const achievements = getAchievements();
+
+ container.innerHTML = `
+  <div class="shopStats">
+   <strong>Coins: ${coins}</strong>
+   <strong>Crates: ${getTotalCrates()}</strong>
+   <strong>Level: ${level}</strong>
+  </div>
+  <div class="featureSection">
+   <h3>Profiel</h3>
+   <div class="infoRow">
+    <span class="statChip">Wheel spins: ${playerStats.wheelSpins || 0}</span>
+    <span class="statChip">Games: ${playerStats.gamesPlayed || 0}</span>
+    <span class="statChip">Clicks: ${playerStats.totalClicks || 0}</span>
+    <span class="statChip">Best accuracy: ${playerStats.bestAccuracy || 0}%</span>
+   </div>
+  </div>
+  <div class="featureSection">
+   <h3>Game Modes</h3>
+   <div class="infoRow">
+    <span class="statChip ${survivalMode ? "active" : ""}">${survivalMode ? "Survival actief" : "Classic timer actief"}</span>
+    <button onclick="toggleSurvivalMode(this)">${survivalMode ? "Zet classic aan" : "Zet survival aan"}</button>
+   </div>
+  </div>
+  <div class="featureSection">
+   <h3>Theme Switcher</h3>
+   <div class="infoRow">
+    ${Object.entries(THEMES).map(([themeId, theme])=> `<button onclick="setTheme('${themeId}', this)">${theme.label}${currentTheme === themeId ? " *" : ""}</button>`).join("")}
+   </div>
+  </div>
+  <div class="featureSection">
+   <h3>Level Progress</h3>
+   <div class="infoRow">
+    <span class="statChip">Level ${level}</span>
+    <span class="statChip">XP ${xp}/${getXpNeeded(level)}</span>
+   </div>
+   <div class="progressBar">
+    <div class="progressFill" style="width:${(xp / getXpNeeded(level)) * 100}%;"></div>
+   </div>
+  </div>
+  <div class="featureSection">
+   <h3>Lucky Wheel</h3>
+   <div class="infoRow">
+    <span class="statChip">${wheelCooldown === 0 ? "Gratis spin klaar" : "Cooldown: " + formatCooldown(wheelCooldown)}</span>
+    <button onclick="spinLuckyWheel(this)">${wheelCooldown === 0 ? "Spin wheel" : "Wachten..."}</button>
+   </div>
+  </div>
+  <div class="featureSection">
+   <h3>Daily Reward</h3>
+   <div class="infoRow">
+    <span class="statChip">${dailyReady ? "Klaar om te claimen" : "Morgen weer beschikbaar"}</span>
+    <button onclick="claimDailyReward(this)">${dailyReady ? "Claim daily" : "Al geclaimd"}</button>
+   </div>
+  </div>
+  <div class="featureSection">
+   <h3>Achievements</h3>
+   ${achievements.map((achievement)=> `
+    <div class="achievementItem ${achievement.unlocked ? "unlocked" : "locked"}">
+     <h4>${achievement.name}</h4>
+     <p>${achievement.description}</p>
+     <span class="statChip">${achievement.unlocked ? "Unlocked" : "Locked"}</span>
+    </div>
+   `).join("")}
+  </div>
+  <div class="featureSection">
+   <h3>Leaderboard</h3>
+   ${leaderboard.length ? `<ol class="leaderboardList">${leaderboard.map((entry)=> `<li>${entry.score} punten - ${entry.date}</li>`).join("")}</ol>` : `<p>Nog geen scores opgeslagen.</p>`}
+  </div>
+  <div class="featureSection">
+   <h3>God Mode</h3>
+   <div class="infoRow">
+    <span class="statChip">Tijdelijk uit</span>
+    <button onclick="toggleGodMode(this)">Tijdelijk uitgeschakeld</button>
+    <button onclick="grantTestResources(this)">Geef resources</button>
+    <button onclick="resetTestCooldowns(this)">Reset cooldowns</button>
+   </div>
+  </div>
+  <div class="featureSection">
+   <h3>Game Reset</h3>
+   <div class="infoRow">
+    <span class="statChip">Wis alle progressie en settings</span>
+    <button onclick="resetGameProgress(this)">Reset game</button>
+   </div>
+  </div>
+  <div class="shopMessage ${feedback.classList.contains("error") ? "error" : "success"}">${feedback.dataset.message || "Bekijk hier je profiel, spins en achievements."}</div>
+ `;
+}
+
+function getPreviewStyle(item){
+ const style = item.style;
+ return `background:${style.background}; box-shadow:${style.boxShadow}; border:${style.border};`;
+}
+
+function getCratePreviewStyle(crate){
+ const map = {
+  common: "background:linear-gradient(135deg,#6b7280,#9ca3af); border:2px solid rgba(229,231,235,0.46); box-shadow:0 0 16px rgba(189,195,199,0.28);",
+  rare: "background:linear-gradient(135deg,#1d4ed8,#60a5fa); border:2px solid rgba(191,219,254,0.5); box-shadow:0 0 18px rgba(93,173,226,0.34);",
+  epic: "background:linear-gradient(135deg,#6d28d9,#c084fc); border:2px solid rgba(233,213,255,0.52); box-shadow:0 0 20px rgba(195,155,211,0.42);",
+  legendary: "background:linear-gradient(135deg,#d97706,#fbbf24,#fff2a8); border:2px solid rgba(255,244,182,0.62); box-shadow:0 0 24px rgba(248,196,113,0.52);"
+ };
+ return map[crate.rarity];
+}
+
+function animateButton(button){
+ if(!button) return;
+ button.classList.add("pressed");
+ setTimeout(()=> button.classList.remove("pressed"), 140);
+}
+
+function showFeedback(message, type){
+ feedback.textContent = message;
+ feedback.dataset.message = message;
+ feedback.className = "";
+ feedback.id = "feedback";
+ feedback.classList.add(type);
+ feedback.classList.add("show");
+ clearTimeout(feedbackTimeout);
+ feedbackTimeout = setTimeout(()=> {
+  feedback.classList.remove("show");
+ }, 1800);
+}
+
+function applySkin(){
+ const activeSkin = SKINS.find((item)=> item.id === skin) || SKINS[0];
+ applySkinToTarget(target, activeSkin, false);
+ applySkinToTarget(targetBoss, activeSkin, true);
+ applySkinToCursor(activeSkin);
+}
+
+function applySkinToTarget(element, activeSkin, bossVariant){
+ element.style.background = activeSkin.style.background;
+ element.style.boxShadow = activeSkin.style.boxShadow;
+ element.style.border = activeSkin.style.border;
+ const effect = getSkinEffect(activeSkin.id);
+ element.style.animation = effect;
+ if(bossVariant){
+  element.style.filter = "brightness(1.1)";
+ }
+ else {
+  element.style.filter = "";
+ }
+}
+
+function applySkinToCursor(activeSkin){
+ customCursor.style.background = activeSkin.style.background;
+ customCursor.style.boxShadow = activeSkin.style.boxShadow;
+ customCursor.style.border = activeSkin.style.border;
+ customCursor.style.animation = getSkinEffect(activeSkin.id);
+}
+
+function getSkinEffect(skinId){
+ if(["default","red","gold"].includes(skinId)) return "pulseGlow 1.2s ease-in-out infinite";
+ if(["neon","plasma","matrix"].includes(skinId)) return "lightningFlash 0.8s linear infinite";
+ if(["galaxy","sunset","candy","crystal"].includes(skinId)) return "floatSpin 1.6s ease-in-out infinite";
+ if(["shadow","lava","toxic","ice"].includes(skinId)) return "shakeGlow 0.7s ease-in-out infinite";
+ return "";
+}
+
+function playSound(type){
+ const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+ if(!AudioContextClass) return;
+ if(!playSound.ctx){
+  playSound.ctx = new AudioContextClass();
+ }
+ const ctx = playSound.ctx;
+ if(ctx.state === "suspended"){
+  ctx.resume();
+ }
+
+ const oscillator = ctx.createOscillator();
+ const gain = ctx.createGain();
+ oscillator.connect(gain);
+ gain.connect(ctx.destination);
+
+ if(type === "click"){
+  oscillator.frequency.value = 520;
+  gain.gain.value = 0.025;
+ }
+ else if(type === "reward"){
+  oscillator.frequency.value = 760;
+  gain.gain.value = 0.04;
+ }
+ else if(type === "levelup"){
+  oscillator.frequency.value = 900;
+  gain.gain.value = 0.05;
+ }
+ else if(type === "boss"){
+  oscillator.frequency.value = 220;
+  gain.gain.value = 0.05;
+ }
+
+ oscillator.type = type === "boss" ? "sawtooth" : "triangle";
+ oscillator.start();
+ gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 0.18);
+ oscillator.stop(ctx.currentTime + 0.18);
+}
+
+function spawnParticles(x, y, color, count){
+ for(let index = 0; index < count; index++){
+  const particle = document.createElement("div");
+  particle.className = "particle";
+  particle.style.left = x + "px";
+  particle.style.top = y + "px";
+  particle.style.background = color;
+  particle.style.setProperty("--dx", (Math.random() * 80 - 40) + "px");
+  particle.style.setProperty("--dy", (Math.random() * -90) + "px");
+  document.body.appendChild(particle);
+  setTimeout(()=> particle.remove(), 700);
+ }
+}
+
+function addCrate(crateId, amount){
+ ownedCrates[crateId] = (ownedCrates[crateId] || 0) + amount;
+}
+
+function getTotalCrates(){
+ return Object.values(ownedCrates).reduce((sum, amount)=> sum + amount, 0);
+}
+
+function getRarityLabel(rarity){
+ return RARITY_META[rarity].label;
+}
+
+function getCrateName(crateId){
+ const crate = CRATES.find((item)=> item.id === crateId);
+ return crate ? crate.name : "crate";
+}
+
+function getCrateSummary(){
+ return "Open je crates na de game. Je hebt nu " + getTotalCrates() + " crates klaarstaan.";
+}
+
+function revealPendingRunCrates(){
+ if(!pendingRunCrates.length) return;
+
+ const counts = {};
+ pendingRunCrates.forEach((crateId)=> {
+  addCrate(crateId, 1);
+  counts[crateId] = (counts[crateId] || 0) + 1;
+ });
+
+ const summary = Object.entries(counts)
+  .map(([crateId, amount])=> amount + "x " + getCrateName(crateId))
+  .join(", ");
+
+ pendingRunCrates = [];
+ showFeedback("Na de game geopend: " + summary + ".", "success");
+}
+
+function getAccuracyPercent(){
+ if(shotsFired === 0) return 100;
+ return Math.round((hitsLanded / shotsFired) * 100);
+}
+
+function getObjectiveText(){
+ if(!currentObjective) return "None";
+ if(currentObjective.id === "moving_targets"){
+  return currentObjective.label + " (" + Math.min(movingTargetHits, currentObjective.goal) + "/" + currentObjective.goal + ")";
+ }
+ if(currentObjective.id === "no_miss"){
+  return currentObjective.label + " (" + (missCount === 0 ? "Alive" : "Failed") + ")";
+ }
+ if(currentObjective.id === "boss_fast"){
+  return currentObjective.label + " (" + (isBossRound ? "Active" : "Check end") + ")";
+ }
+ return currentObjective.label;
+}
+
+function resolveRunObjective(){
+ if(!currentObjective) return;
+ let completed = false;
+ if(currentObjective.id === "moving_targets"){
+  completed = movingTargetHits >= currentObjective.goal;
+ }
+ else if(currentObjective.id === "no_miss"){
+  completed = missCount === 0;
+ }
+ else if(currentObjective.id === "boss_fast"){
+  completed = bossMaxHealth > 0 && bossHealth === 0 && (Date.now() - bossStartTime) < 12000;
+ }
+ if(completed){
+  coins += currentObjective.reward;
+  showFeedback("Objective complete! +" + currentObjective.reward + " coins.", "success");
+ }
+}
+
+function rollCrateReward(crateData){
+ const [coinMin, coinMax] = crateData.coinRange;
+ const coinsWon = coinMin + Math.floor(Math.random() * (coinMax - coinMin + 1));
+ const availableSkins = SKINS.filter((item)=> item.price > 0 && !ownedSkins.includes(item.id) && crateData.skinRarities.includes(item.rarity));
+
+ if(availableSkins.length && Math.random() < crateData.skinChance){
+  return {
+   coins: coinsWon,
+   skin: availableSkins[Math.floor(Math.random() * availableSkins.length)]
+  };
+ }
+
+ if(Math.random() < 0.02 && crateData.rarity !== "legendary"){
+  const upgradeIndex = CRATES.findIndex((item)=> item.id === crateData.id) + 1;
+  const upgraded = CRATES[Math.min(upgradeIndex, CRATES.length - 1)];
+  if(upgraded.id !== crateData.id){
+   return {
+    coins: coinsWon,
+    bonusCrate: upgraded.id
+   };
+  }
+ }
+
+ return { coins: coinsWon };
+}
+
+function getRandomBonusCrateId(){
+ const roll = Math.random();
+ if(roll < 0.58) return "common";
+ if(roll < 0.83) return "rare";
+ if(roll < 0.96) return "epic";
+ return "legendary";
+}
+
+function scheduleBonusCrate(){
+ clearTimeout(bonusSpawnTimeout);
+ clearTimeout(bonusHideTimeout);
+ if(!gameRunning || paused) return;
+
+ const nextSpawnDelay = 3500 + Math.random() * 5000;
+ bonusSpawnTimeout = setTimeout(spawnBonusCrate, nextSpawnDelay);
+}
+
+function spawnBonusCrate(){
+ if(!gameRunning || paused) return;
+
+ const w = gameArea.clientWidth;
+ const h = gameArea.clientHeight;
+ eliteCrateActive = Math.random() < 0.12;
+
+ bonusCrate.style.display = "block";
+ bonusCrate.style.width = eliteCrateActive ? "34px" : "42px";
+ bonusCrate.style.height = eliteCrateActive ? "34px" : "42px";
+ bonusCrate.style.background = eliteCrateActive
+  ? "linear-gradient(135deg,#7c3aed,#f59e0b,#fde68a)"
+  : "linear-gradient(135deg,#8b5a2b,#d4a373)";
+ bonusCrate.style.boxShadow = eliteCrateActive
+  ? "0 0 22px rgba(245,158,11,0.75)"
+  : "0 0 18px rgba(255,183,77,0.55)";
+ const crateSize = eliteCrateActive ? 34 : 42;
+  bonusCrate.style.left = Math.random() * (w - crateSize) + "px";
+  bonusCrate.style.top = Math.random() * (h - crateSize) + "px";
+
+  bonusHideTimeout = setTimeout(()=> {
+  bonusCrate.style.display = "none";
+  scheduleBonusCrate();
+ }, 2200);
+}
+
+function collectBonusCrate(event){
+ if(!gameRunning || paused || bonusCrate.style.display === "none") return;
+
+ clearTimeout(bonusHideTimeout);
+ bonusCrate.style.display = "none";
+
+ const coinReward = eliteCrateActive ? 8 + Math.floor(Math.random() * 7) : 3 + Math.floor(Math.random() * 5);
+ coins += coinReward;
+ const foundCrateId = eliteCrateActive ? weightedChoice([
+  { weight:55, id:"rare" },
+  { weight:30, id:"epic" },
+  { weight:15, id:"legendary" }
+ ]).id : getRandomBonusCrateId();
+ pendingRunCrates.push(foundCrateId);
+ let rewardMessage = (eliteCrateActive ? "Elite crate" : "Bonus crate") + " gepakt: +" + coinReward + " coins en 1 mystery crate!";
+ eliteCrateActive = false;
+
+ spawnParticles(event.clientX, event.clientY, "#ffd166", 14);
+ showFeedback(rewardMessage, "success");
+ playSound("reward");
+ updateUI();
+ scheduleBonusCrate();
+}
+
+bonusCrate.onclick = collectBonusCrate;
+crateBox.onclick = handleCrateBoxClick;
+gameArea.addEventListener("mousemove", (event)=> {
+ if(!gameRunning || paused) return;
+ const rect = gameArea.getBoundingClientRect();
+ customCursor.style.display = "block";
+ customCursor.style.left = (event.clientX - rect.left) + "px";
+ customCursor.style.top = (event.clientY - rect.top) + "px";
+});
+gameArea.addEventListener("mouseenter", ()=> {
+ if(!gameRunning || paused) return;
+ customCursor.style.display = "block";
+});
+gameArea.addEventListener("mouseleave", ()=> {
+ customCursor.style.display = "none";
+});
+
+applyTheme();
+syncDurationInputs();
+updateUI();
 </script>
 
 </body>
